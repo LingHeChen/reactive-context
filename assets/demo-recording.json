@@ -1,0 +1,839 @@
+{
+  "model": "deterministic FunctionModel; not a real LLM quality evaluation",
+  "database": "real in-memory SQLite; both tools execute SQL",
+  "scope": "customer-report",
+  "registered_parts": [
+    "skill",
+    "tool",
+    "dbschema"
+  ],
+  "stages": [
+    {
+      "stage": 0,
+      "label": "初始状态",
+      "snapshot_id": "27dccd5a54894d9e88d50836baceec8d62f182e279633f10b649715f13045ab9",
+      "parts": [
+        {
+          "part": "skill",
+          "version": 1,
+          "revision": "ce19b02aa74f1186b79a9cf6660878d645aeddb1ec1fca100aed8fbf4841e799",
+          "status": "CURRENT",
+          "change": "NEW",
+          "resolves": 1,
+          "value": "# 客户名单 Skill\n查询客户名单，按 id 升序排列，最多返回 3 条记录。\n"
+        },
+        {
+          "part": "tool",
+          "version": 1,
+          "revision": "a922c91a1b6bd29a1ea0dc5f57fb059dbcec37fec07403d1030394ceba6f905c",
+          "status": "CURRENT",
+          "change": "NEW",
+          "resolves": 1,
+          "value": [
+            {
+              "name": "query_database",
+              "parameters_json_schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "sql": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sql"
+                ],
+                "type": "object"
+              }
+            }
+          ]
+        },
+        {
+          "part": "dbschema",
+          "version": 1,
+          "revision": "bc094cadae2db44ba5e296e3478f7c61ba149e036333ac4e4c395823a516a1ae",
+          "status": "CURRENT",
+          "change": "NEW",
+          "resolves": 1,
+          "value": {
+            "tables": [
+              {
+                "name": "customers",
+                "columns": [
+                  "id",
+                  "name"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "model_requests": 2,
+      "request_frames": [
+        {
+          "stage": 0,
+          "phase": "tool_call",
+          "active_data": {
+            "skill://customer-report": {
+              "payload": "# 客户名单 Skill\n查询客户名单，按 id 升序排列，最多返回 3 条记录。\n",
+              "role": "system"
+            },
+            "dbschema://main": {
+              "revision": "bc094cadae2db44ba5e296e3478f7c61ba149e036333ac4e4c395823a516a1ae",
+              "payload": {
+                "tables": [
+                  {
+                    "columns": [
+                      "id",
+                      "name"
+                    ],
+                    "name": "customers"
+                  }
+                ]
+              }
+            }
+          },
+          "message_layout": [
+            "system:skill",
+            "user-prefix:dbschema",
+            "cache-breakpoint",
+            "user:history/task"
+          ],
+          "visible_tools": [
+            "query_database"
+          ],
+          "sql": "SELECT id, name FROM customers ORDER BY id LIMIT 3;"
+        },
+        {
+          "stage": 0,
+          "phase": "answer",
+          "active_data": {
+            "skill://customer-report": {
+              "payload": "# 客户名单 Skill\n查询客户名单，按 id 升序排列，最多返回 3 条记录。\n",
+              "role": "system"
+            },
+            "dbschema://main": {
+              "revision": "bc094cadae2db44ba5e296e3478f7c61ba149e036333ac4e4c395823a516a1ae",
+              "payload": {
+                "tables": [
+                  {
+                    "columns": [
+                      "id",
+                      "name"
+                    ],
+                    "name": "customers"
+                  }
+                ]
+              }
+            }
+          },
+          "message_layout": [
+            "system:skill",
+            "user-prefix:dbschema",
+            "cache-breakpoint",
+            "user:history/task",
+            "assistant:history",
+            "tool-result:query_database"
+          ],
+          "visible_tools": [
+            "query_database"
+          ],
+          "sql": "SELECT id, name FROM customers ORDER BY id LIMIT 3;"
+        }
+      ],
+      "output": {
+        "tool": "query_database",
+        "sql": "SELECT id, name FROM customers ORDER BY id LIMIT 3;",
+        "result": [
+          {
+            "id": 1,
+            "name": "Ada"
+          },
+          {
+            "id": 2,
+            "name": "Lin"
+          },
+          {
+            "id": 3,
+            "name": "Mei"
+          }
+        ]
+      },
+      "execution": {
+        "tool": "query_database",
+        "sql": "SELECT id, name FROM customers ORDER BY id LIMIT 3;",
+        "rows": [
+          {
+            "id": 1,
+            "name": "Ada"
+          },
+          {
+            "id": 2,
+            "name": "Lin"
+          },
+          {
+            "id": 3,
+            "name": "Mei"
+          }
+        ]
+      },
+      "input_history_unchanged": true,
+      "prefix_diagnostic": {
+        "trace_id": "afe18aa5-6b39-4a11-8945-0b57e088210f",
+        "event": "prompt_prefix",
+        "scope_id": "customer-report",
+        "part_id": "",
+        "revision": "",
+        "generation": 0,
+        "reason": "first_prefix",
+        "duration_ms": 0,
+        "cache_hit": false,
+        "freshness_status": "",
+        "snapshot_id": "27dccd5a54894d9e88d50836baceec8d62f182e279633f10b649715f13045ab9",
+        "invocation_id": "01a17bf3-ebd1-725a-b0bb-282d596f25da:1",
+        "observed_at": 1793080945.633905,
+        "prefix_hash": "90784b272ba7af89b4ca30473bc2ae50b66e09073224219f77ca95a100dc7f27",
+        "prefix_bytes": 732,
+        "prefix_blocks": 4,
+        "reused_prefix_bytes": 0,
+        "reused_prefix_blocks": 0,
+        "input_tokens": 0,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0,
+        "usage_reported": false,
+        "usage_source": "",
+        "resource_id": "",
+        "token_estimate": 0,
+        "compiler_config_revision": ""
+      },
+      "model_cache_usage": {
+        "window": "retained_events",
+        "recorded_requests": 2,
+        "input_tokens": 198,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0,
+        "cache_read_fraction": 0.0,
+        "usage_sources": [
+          "function"
+        ]
+      }
+    },
+    {
+      "stage": 1,
+      "label": "仅修改 Skill",
+      "snapshot_id": "d20a84c74dd751c88b25e5a81cfa14f3352571a76e2c53b40a991efa5a5a057b",
+      "parts": [
+        {
+          "part": "skill",
+          "version": 2,
+          "revision": "5bdf62317565f7e7c860b22687251758479853a2f62d094c50dfb229bb3426bc",
+          "status": "CURRENT",
+          "change": "CHANGED",
+          "resolves": 1,
+          "value": "# 客户名单 Skill\n查询客户名单，按 id 升序排列，最多返回 1 条记录。\n"
+        },
+        {
+          "part": "tool",
+          "version": 1,
+          "revision": "a922c91a1b6bd29a1ea0dc5f57fb059dbcec37fec07403d1030394ceba6f905c",
+          "status": "CURRENT",
+          "change": "REUSED",
+          "resolves": 0,
+          "value": [
+            {
+              "name": "query_database",
+              "parameters_json_schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "sql": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sql"
+                ],
+                "type": "object"
+              }
+            }
+          ]
+        },
+        {
+          "part": "dbschema",
+          "version": 1,
+          "revision": "bc094cadae2db44ba5e296e3478f7c61ba149e036333ac4e4c395823a516a1ae",
+          "status": "CURRENT",
+          "change": "REUSED",
+          "resolves": 0,
+          "value": {
+            "tables": [
+              {
+                "name": "customers",
+                "columns": [
+                  "id",
+                  "name"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "model_requests": 2,
+      "request_frames": [
+        {
+          "stage": 1,
+          "phase": "tool_call",
+          "active_data": {
+            "skill://customer-report": {
+              "payload": "# 客户名单 Skill\n查询客户名单，按 id 升序排列，最多返回 1 条记录。\n",
+              "role": "system"
+            },
+            "dbschema://main": {
+              "revision": "bc094cadae2db44ba5e296e3478f7c61ba149e036333ac4e4c395823a516a1ae",
+              "payload": {
+                "tables": [
+                  {
+                    "columns": [
+                      "id",
+                      "name"
+                    ],
+                    "name": "customers"
+                  }
+                ]
+              }
+            }
+          },
+          "message_layout": [
+            "system:skill",
+            "user-prefix:dbschema",
+            "cache-breakpoint",
+            "user:history/task",
+            "assistant:history",
+            "tool-result:query_database",
+            "assistant:history",
+            "user:history/task"
+          ],
+          "visible_tools": [
+            "query_database"
+          ],
+          "sql": "SELECT id, name FROM customers ORDER BY id LIMIT 1;"
+        },
+        {
+          "stage": 1,
+          "phase": "answer",
+          "active_data": {
+            "skill://customer-report": {
+              "payload": "# 客户名单 Skill\n查询客户名单，按 id 升序排列，最多返回 1 条记录。\n",
+              "role": "system"
+            },
+            "dbschema://main": {
+              "revision": "bc094cadae2db44ba5e296e3478f7c61ba149e036333ac4e4c395823a516a1ae",
+              "payload": {
+                "tables": [
+                  {
+                    "columns": [
+                      "id",
+                      "name"
+                    ],
+                    "name": "customers"
+                  }
+                ]
+              }
+            }
+          },
+          "message_layout": [
+            "system:skill",
+            "user-prefix:dbschema",
+            "cache-breakpoint",
+            "user:history/task",
+            "assistant:history",
+            "tool-result:query_database",
+            "assistant:history",
+            "user:history/task",
+            "assistant:history",
+            "tool-result:query_database"
+          ],
+          "visible_tools": [
+            "query_database"
+          ],
+          "sql": "SELECT id, name FROM customers ORDER BY id LIMIT 1;"
+        }
+      ],
+      "output": {
+        "tool": "query_database",
+        "sql": "SELECT id, name FROM customers ORDER BY id LIMIT 1;",
+        "result": [
+          {
+            "id": 1,
+            "name": "Ada"
+          }
+        ]
+      },
+      "execution": {
+        "tool": "query_database",
+        "sql": "SELECT id, name FROM customers ORDER BY id LIMIT 1;",
+        "rows": [
+          {
+            "id": 1,
+            "name": "Ada"
+          }
+        ]
+      },
+      "input_history_unchanged": true,
+      "prefix_diagnostic": {
+        "trace_id": "f2f12c68-6265-4661-95a6-fed0307f93cd",
+        "event": "prompt_prefix",
+        "scope_id": "customer-report",
+        "part_id": "",
+        "revision": "",
+        "generation": 0,
+        "reason": "changed:instruction:skill",
+        "duration_ms": 0,
+        "cache_hit": false,
+        "freshness_status": "",
+        "snapshot_id": "d20a84c74dd751c88b25e5a81cfa14f3352571a76e2c53b40a991efa5a5a057b",
+        "invocation_id": "01a17bf3-ebe6-7784-8b58-9159afe6c807:1",
+        "observed_at": 1793080945.641031,
+        "prefix_hash": "0ff75ca2b4c48ac3f51ccd4181c07ba3cc830facd03ddef4b076eaf9f1a4a191",
+        "prefix_bytes": 732,
+        "prefix_blocks": 4,
+        "reused_prefix_bytes": 355,
+        "reused_prefix_blocks": 2,
+        "input_tokens": 0,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0,
+        "usage_reported": false,
+        "usage_source": "",
+        "resource_id": "",
+        "token_estimate": 0,
+        "compiler_config_revision": ""
+      },
+      "model_cache_usage": {
+        "window": "retained_events",
+        "recorded_requests": 4,
+        "input_tokens": 424,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0,
+        "cache_read_fraction": 0.0,
+        "usage_sources": [
+          "function"
+        ]
+      }
+    },
+    {
+      "stage": 2,
+      "label": "仅修改 Tool",
+      "snapshot_id": "2b2d23e684a9799adbaf16eb8e40cd933ca4f77aec44bed0017aedd503684f4e",
+      "parts": [
+        {
+          "part": "skill",
+          "version": 2,
+          "revision": "5bdf62317565f7e7c860b22687251758479853a2f62d094c50dfb229bb3426bc",
+          "status": "CURRENT",
+          "change": "REUSED",
+          "resolves": 0,
+          "value": "# 客户名单 Skill\n查询客户名单，按 id 升序排列，最多返回 1 条记录。\n"
+        },
+        {
+          "part": "tool",
+          "version": 2,
+          "revision": "86597aad6b37e8a1192d61852712df0f358d7f14c6f33699d56a79fd51bba10e",
+          "status": "CURRENT",
+          "change": "CHANGED",
+          "resolves": 1,
+          "value": [
+            {
+              "name": "export_csv",
+              "parameters_json_schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "sql": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sql"
+                ],
+                "type": "object"
+              }
+            }
+          ]
+        },
+        {
+          "part": "dbschema",
+          "version": 1,
+          "revision": "bc094cadae2db44ba5e296e3478f7c61ba149e036333ac4e4c395823a516a1ae",
+          "status": "CURRENT",
+          "change": "REUSED",
+          "resolves": 0,
+          "value": {
+            "tables": [
+              {
+                "name": "customers",
+                "columns": [
+                  "id",
+                  "name"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "model_requests": 2,
+      "request_frames": [
+        {
+          "stage": 2,
+          "phase": "tool_call",
+          "active_data": {
+            "skill://customer-report": {
+              "payload": "# 客户名单 Skill\n查询客户名单，按 id 升序排列，最多返回 1 条记录。\n",
+              "role": "system"
+            },
+            "dbschema://main": {
+              "revision": "bc094cadae2db44ba5e296e3478f7c61ba149e036333ac4e4c395823a516a1ae",
+              "payload": {
+                "tables": [
+                  {
+                    "columns": [
+                      "id",
+                      "name"
+                    ],
+                    "name": "customers"
+                  }
+                ]
+              }
+            }
+          },
+          "message_layout": [
+            "system:skill",
+            "user-prefix:dbschema",
+            "cache-breakpoint",
+            "user:history/task",
+            "assistant:history",
+            "tool-result:query_database",
+            "assistant:history",
+            "user:history/task",
+            "assistant:history",
+            "tool-result:query_database",
+            "assistant:history",
+            "user:history/task"
+          ],
+          "visible_tools": [
+            "export_csv"
+          ],
+          "sql": "SELECT id, name FROM customers ORDER BY id LIMIT 1;"
+        },
+        {
+          "stage": 2,
+          "phase": "answer",
+          "active_data": {
+            "skill://customer-report": {
+              "payload": "# 客户名单 Skill\n查询客户名单，按 id 升序排列，最多返回 1 条记录。\n",
+              "role": "system"
+            },
+            "dbschema://main": {
+              "revision": "bc094cadae2db44ba5e296e3478f7c61ba149e036333ac4e4c395823a516a1ae",
+              "payload": {
+                "tables": [
+                  {
+                    "columns": [
+                      "id",
+                      "name"
+                    ],
+                    "name": "customers"
+                  }
+                ]
+              }
+            }
+          },
+          "message_layout": [
+            "system:skill",
+            "user-prefix:dbschema",
+            "cache-breakpoint",
+            "user:history/task",
+            "assistant:history",
+            "tool-result:query_database",
+            "assistant:history",
+            "user:history/task",
+            "assistant:history",
+            "tool-result:query_database",
+            "assistant:history",
+            "user:history/task",
+            "assistant:history",
+            "tool-result:export_csv"
+          ],
+          "visible_tools": [
+            "export_csv"
+          ],
+          "sql": "SELECT id, name FROM customers ORDER BY id LIMIT 1;"
+        }
+      ],
+      "output": {
+        "tool": "export_csv",
+        "sql": "SELECT id, name FROM customers ORDER BY id LIMIT 1;",
+        "result": "id,name\n1,Ada\n"
+      },
+      "execution": {
+        "tool": "export_csv",
+        "sql": "SELECT id, name FROM customers ORDER BY id LIMIT 1;",
+        "rows": [
+          {
+            "id": 1,
+            "name": "Ada"
+          }
+        ]
+      },
+      "input_history_unchanged": true,
+      "prefix_diagnostic": {
+        "trace_id": "114e804d-09e6-44f8-9bb9-e89392c5156c",
+        "event": "prompt_prefix",
+        "scope_id": "customer-report",
+        "part_id": "",
+        "revision": "",
+        "generation": 0,
+        "reason": "changed:tools",
+        "duration_ms": 0,
+        "cache_hit": false,
+        "freshness_status": "",
+        "snapshot_id": "2b2d23e684a9799adbaf16eb8e40cd933ca4f77aec44bed0017aedd503684f4e",
+        "invocation_id": "01a17bf3-ebec-76ef-9c50-0086b9ae9d9f:1",
+        "observed_at": 1793080945.6461241,
+        "prefix_hash": "5069016319e1901b42560c416632260da92ff236c01ea4c3ab0c00152d1c5542",
+        "prefix_bytes": 725,
+        "prefix_blocks": 4,
+        "reused_prefix_bytes": 28,
+        "reused_prefix_blocks": 1,
+        "input_tokens": 0,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0,
+        "usage_reported": false,
+        "usage_source": "",
+        "resource_id": "",
+        "token_estimate": 0,
+        "compiler_config_revision": ""
+      },
+      "model_cache_usage": {
+        "window": "retained_events",
+        "recorded_requests": 6,
+        "input_tokens": 664,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0,
+        "cache_read_fraction": 0.0,
+        "usage_sources": [
+          "function"
+        ]
+      }
+    },
+    {
+      "stage": 3,
+      "label": "仅修改 DB Schema",
+      "snapshot_id": "d7c09c8276a94d14c2d92102709d9b3cb52c2aff73a374d4922c50843838d0d0",
+      "parts": [
+        {
+          "part": "skill",
+          "version": 2,
+          "revision": "5bdf62317565f7e7c860b22687251758479853a2f62d094c50dfb229bb3426bc",
+          "status": "CURRENT",
+          "change": "REUSED",
+          "resolves": 0,
+          "value": "# 客户名单 Skill\n查询客户名单，按 id 升序排列，最多返回 1 条记录。\n"
+        },
+        {
+          "part": "tool",
+          "version": 2,
+          "revision": "86597aad6b37e8a1192d61852712df0f358d7f14c6f33699d56a79fd51bba10e",
+          "status": "CURRENT",
+          "change": "REUSED",
+          "resolves": 0,
+          "value": [
+            {
+              "name": "export_csv",
+              "parameters_json_schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "sql": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sql"
+                ],
+                "type": "object"
+              }
+            }
+          ]
+        },
+        {
+          "part": "dbschema",
+          "version": 2,
+          "revision": "45dbe2c817c9757c79275fd98b6e84e2e1d4799cacf43471ff73c4ba9ee4c743",
+          "status": "CURRENT",
+          "change": "CHANGED",
+          "resolves": 1,
+          "value": {
+            "tables": [
+              {
+                "name": "customer_accounts",
+                "columns": [
+                  "id",
+                  "display_name"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "model_requests": 2,
+      "request_frames": [
+        {
+          "stage": 3,
+          "phase": "tool_call",
+          "active_data": {
+            "skill://customer-report": {
+              "payload": "# 客户名单 Skill\n查询客户名单，按 id 升序排列，最多返回 1 条记录。\n",
+              "role": "system"
+            },
+            "dbschema://main": {
+              "revision": "45dbe2c817c9757c79275fd98b6e84e2e1d4799cacf43471ff73c4ba9ee4c743",
+              "payload": {
+                "tables": [
+                  {
+                    "columns": [
+                      "id",
+                      "display_name"
+                    ],
+                    "name": "customer_accounts"
+                  }
+                ]
+              }
+            }
+          },
+          "message_layout": [
+            "system:skill",
+            "user-prefix:dbschema",
+            "cache-breakpoint",
+            "user:history/task",
+            "assistant:history",
+            "tool-result:query_database",
+            "assistant:history",
+            "user:history/task",
+            "assistant:history",
+            "tool-result:query_database",
+            "assistant:history",
+            "user:history/task",
+            "assistant:history",
+            "tool-result:export_csv",
+            "assistant:history",
+            "user:history/task"
+          ],
+          "visible_tools": [
+            "export_csv"
+          ],
+          "sql": "SELECT id, display_name FROM customer_accounts ORDER BY id LIMIT 1;"
+        },
+        {
+          "stage": 3,
+          "phase": "answer",
+          "active_data": {
+            "skill://customer-report": {
+              "payload": "# 客户名单 Skill\n查询客户名单，按 id 升序排列，最多返回 1 条记录。\n",
+              "role": "system"
+            },
+            "dbschema://main": {
+              "revision": "45dbe2c817c9757c79275fd98b6e84e2e1d4799cacf43471ff73c4ba9ee4c743",
+              "payload": {
+                "tables": [
+                  {
+                    "columns": [
+                      "id",
+                      "display_name"
+                    ],
+                    "name": "customer_accounts"
+                  }
+                ]
+              }
+            }
+          },
+          "message_layout": [
+            "system:skill",
+            "user-prefix:dbschema",
+            "cache-breakpoint",
+            "user:history/task",
+            "assistant:history",
+            "tool-result:query_database",
+            "assistant:history",
+            "user:history/task",
+            "assistant:history",
+            "tool-result:query_database",
+            "assistant:history",
+            "user:history/task",
+            "assistant:history",
+            "tool-result:export_csv",
+            "assistant:history",
+            "user:history/task",
+            "assistant:history",
+            "tool-result:export_csv"
+          ],
+          "visible_tools": [
+            "export_csv"
+          ],
+          "sql": "SELECT id, display_name FROM customer_accounts ORDER BY id LIMIT 1;"
+        }
+      ],
+      "output": {
+        "tool": "export_csv",
+        "sql": "SELECT id, display_name FROM customer_accounts ORDER BY id LIMIT 1;",
+        "result": "id,display_name\n1,Ada\n"
+      },
+      "execution": {
+        "tool": "export_csv",
+        "sql": "SELECT id, display_name FROM customer_accounts ORDER BY id LIMIT 1;",
+        "rows": [
+          {
+            "id": 1,
+            "display_name": "Ada"
+          }
+        ]
+      },
+      "input_history_unchanged": true,
+      "prefix_diagnostic": {
+        "trace_id": "0f8edc5f-2614-4969-a069-42bcd2f06b63",
+        "event": "prompt_prefix",
+        "scope_id": "customer-report",
+        "part_id": "",
+        "revision": "",
+        "generation": 0,
+        "reason": "changed:prefix-data:dbschema",
+        "duration_ms": 0,
+        "cache_hit": false,
+        "freshness_status": "",
+        "snapshot_id": "d7c09c8276a94d14c2d92102709d9b3cb52c2aff73a374d4922c50843838d0d0",
+        "invocation_id": "01a17bf3-ebf2-744e-8766-b114b92d6de6:1",
+        "observed_at": 1793080945.653035,
+        "prefix_hash": "4c8ee9f559ae6671e0311319ed79ee0710e2a831e405d025efd6e9d43ae3402d",
+        "prefix_bytes": 741,
+        "prefix_blocks": 4,
+        "reused_prefix_bytes": 507,
+        "reused_prefix_blocks": 3,
+        "input_tokens": 0,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0,
+        "usage_reported": false,
+        "usage_source": "",
+        "resource_id": "",
+        "token_estimate": 0,
+        "compiler_config_revision": ""
+      },
+      "model_cache_usage": {
+        "window": "retained_events",
+        "recorded_requests": 8,
+        "input_tokens": 916,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0,
+        "cache_read_fraction": 0.0,
+        "usage_sources": [
+          "function"
+        ]
+      }
+    }
+  ],
+  "history_note": "原始历史保留先前的 SQL 和结果；当前来源投影使用新版本。"
+}

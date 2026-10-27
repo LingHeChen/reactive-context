@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b0909">
+<meta name="description" content="Reactive Context：在每次模型请求前核验来源、更新依赖，把资源、记忆与工作状态编译成可追溯的上下文快照。">
+<title>Reactive Context · 与变化同步</title>
+<link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./assets/fonts.css"><link rel="stylesheet" href="./style.css?v=11">
+<script src="./assets/vendor/gsap-3.13.0.min.js" defer></script>
+<script src="./assets/vendor/ScrollTrigger-3.13.0.min.js" defer></script>
+<script src="./app.js?v=11" defer></script>
+<script src="./fluid.js?v=11" defer></script>
+<script src="./demo-flow.js?v=11" defer></script>
+<script src="./scroll.js?v=11" defer></script>
+</head>
+<body>
+<div class="reading-progress" aria-hidden="true"><span></span></div>
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="nav">
+  <a href="#main" class="brand" aria-label="Reactive Context 首页"><svg viewBox="0 0 30 30" aria-hidden="true"><path d="M7 8h8a7 7 0 0 1 0 14H7V8Zm0 0 16 14M7 15h15"/></svg><span>reactive context<span class="brand-period">.</span></span></a>
+  <nav aria-label="主导航"><a href="#overview">项目概览</a><a href="#architecture">工作原理</a><a href="#experience">交互实例</a><a href="#notes">设计手记</a></nav>
+  <div class="nav-actions"><button id="motion-toggle" class="motion-toggle" aria-label="暂停流光动效" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg><span>暂停流光</span></button><a class="nav-start" href="#start">开始使用 <span aria-hidden="true">↗</span></a></div>
+</header>
+<main id="main">
+<section class="hero shell" aria-labelledby="hero-title">
+  <div class="hero-cover">
+    <div class="fluid-art red-gold" aria-hidden="true"><i class="fluid-layer fluid-one"></i><i class="fluid-layer fluid-two"></i><i class="fluid-layer fluid-three"></i><div class="fluid-shade"></div></div>
+    <div class="cover-top"><span>Reactive Context</span><span>响应式上下文中间件</span></div>
+    <div class="hero-copy"><p class="hero-intro">为持续变化的 Agent 任务而生</p><h1 id="hero-title">每一次推理，<br>都与此刻同步。</h1><p class="hero-description">让变化的资源、有效的记忆与当前目标，<br>在模型请求前，重新汇成清晰的上下文。</p><a class="hero-link" href="#overview">了解这个项目 <span aria-hidden="true">↓</span></a></div>
+    <div class="cover-bottom"><span>Parts react. Contexts compile.</span><span>Python · Pydantic AI · SQLite</span></div>
+  </div>
+  <div class="hero-caption"><p>一个关于上下文如何更新、保留与交付的工程实践。</p><a href="#experience">直接看交互实例 <span aria-hidden="true">↗</span></a></div>
+</section>
+
+<section class="overview shell chapter" id="overview" aria-labelledby="overview-title">
+  <div class="chapter-label"><span>01</span> 项目从哪里开始</div>
+  <div class="editorial-heading"><h2 id="overview-title">任务还在继续。<br><span>上下文已经变了。</span></h2><div class="intro-text"><p>Agent 执行一段长任务时，数据库可能换了表结构，工具的权限可能被收回，用户也可能修改了先前的要求。</p><p>如果只把消息不断追加给模型，旧信息与新约束会混在一起。Reactive Context 把这些变化变成可以管理、核验和追溯的状态。</p></div></div>
+  <div class="problem-list">
+    <article><span class="problem-index">01 / 时效</span><h3>外部来源更新了，<br>模型还在读旧版本。</h3><p>把 Skill、工具目录和 Schema 作为独立 Part，在每次请求边界核验来源版本，刷新受影响的依赖。</p></article>
+    <article><span class="problem-index">02 / 延续</span><h3>历史越来越长，<br>有效约束却越来越难找。</h3><p>保留原始归档，区分近期历史、长期 Fact 与当前工作状态；需要时，通过授权的检索路径恢复证据。</p></article>
+    <article><span class="problem-index">03 / 可解释</span><h3>回答出了问题，<br>却不知道这一轮看到了什么。</h3><p>每次编译保留来源、版本、入选原因与省略诊断，让模型实际输入有据可查。</p></article>
+  </div>
+  <p class="scope-note">定位：接入已有 Agent Runtime 的 Python 库。任务规划、工具执行与模型推理由宿主框架负责。</p>
+</section>
+
+<section class="architecture chapter shell" id="architecture" aria-labelledby="architecture-title">
+  <div class="chapter-label"><span>02</span> 一次请求，如何形成</div>
+  <div class="editorial-heading"><h2 id="architecture-title">从变化的来源，<br><span>到确定的输入。</span></h2><p class="intro-text">把上下文构建收敛到一个明确边界：每次模型调用之前。工具调用后的下一轮请求，同样经过这条链路。</p></div>
+  <div class="architecture-map">
+    <div class="map-input"><span class="map-caption">宿主提供</span><p>用户任务、身份、权限与策略</p><span class="map-arrow" aria-hidden="true">↓</span></div>
+    <div class="map-lanes"><div class="map-sources"><span class="map-caption">统一 Part 接口</span><ul><li>Skill / 工具 / DB Schema</li><li>已授权、已选中的 Fact</li><li>工作目标与结构化状态</li><li>Computed 派生内容</li></ul></div>
+      <div class="map-core"><div><small>请求边界</small><strong>ContextManager</strong><span>管理 Part 与激活集合</span></div><span class="map-arrow" aria-hidden="true">↓</span><div class="core-highlight"><small>响应式核心</small><strong>核验 → 刷新 → 快照</strong><span>来源版本 / 依赖 DAG / generation</span></div><span class="map-arrow" aria-hidden="true">↓</span><div><small>统一编译</small><strong>Compiler</strong><span>权限角色 / 去重 / 预算 / 稳定排序</span></div></div>
+      <div class="map-storage"><span class="map-caption">持久层与历史</span><div><strong>ContextStore</strong><p>SQLite 元数据、ACL、Fact 修订与激活引用。</p></div><div><strong>HistoryManager</strong><p>完整历史归档、近期投影与按需恢复。</p></div><small>与管理层协作，不直接授予指令权限。</small></div></div>
+    <div class="map-output"><span>messages</span><span>tools</span><span>manifest</span><span>trace</span><b aria-hidden="true">→</b><strong>框架适配器 → 模型</strong></div>
+  </div>
+  <div class="mechanism-list">
+    <details open><summary><span>异步读取晚到，怎么避免旧值覆盖新值？</span><span class="disclosure" aria-hidden="true"></span></summary><div class="detail-body"><p>每个 Part 的解析受单飞控制。解析前记录 generation，完成时重新检查；期间依赖发生变化，就丢弃过期结果或按策略重试。声明式来源还会在最终封存前核验版本。</p><p class="detail-boundary">一致性依赖来源版本的可信度；多个外部系统并不天然拥有同一时刻的全局原子快照。</p></div></details>
+    <details><summary><span>文件监听漏了通知，还能发现变化吗？</span><span class="disclosure" aria-hidden="true"></span></summary><div class="detail-body"><p>通知负责及时标记 dirty，请求边界的 revision 核验负责确认当前版本。无版本能力的来源标记为 best_effort，严格模式拒绝静默降级。</p></div></details>
+    <details><summary><span>为什么要编译成快照，而不是直接拼消息？</span><span class="disclosure" aria-hidden="true"></span></summary><div class="detail-body"><p>Part 通过统一中间表示交付内容，Compiler 集中执行权限、预算和顺序规则。必需内容无法纳入时明确失败，可选内容被省略时保留诊断。已有快照不会随之后的状态修改。</p></div></details>
+  </div>
+</section>
+
+<section class="experience chapter shell" id="experience" aria-labelledby="experience-title">
+  <div class="chapter-label"><span>03</span> 看一次变化，如何传递</div>
+  <div class="editorial-heading"><h2 id="experience-title">只改一个来源。<br><span>观察下一次请求。</span></h2><p class="intro-text">同一个 Agent、同一个 scope、连续的历史。依次修改规则、工具和数据结构，比较模型看到的内容与实际执行结果。</p></div>
+      <div class="studio reveal">
+        <div class="studio-top"><div><span class="live-dot"></span><strong>一次真实的上下文更新</strong><span class="studio-sub">customer-report</span></div><button id="replay-toggle" class="small-button" aria-label="自动演示四个阶段"><span class="play-icon">▶</span><span class="replay-label">自动演示</span></button></div>
+        <div class="track-tabs" role="tablist" aria-label="演示阶段">
+          <button role="tab" id="tab-0" aria-selected="true" aria-controls="demo-panel" tabindex="0" data-step="0"><span class="track-number">01</span><div>初始请求<small>三个来源，首次解析</small></div><span class="track-status">↗</span></button>
+          <button role="tab" id="tab-1" aria-selected="false" aria-controls="demo-panel" tabindex="-1" data-step="1"><span class="track-number">02</span><div>修改规则<small>最多返回一条记录</small></div><span class="track-status">↗</span></button>
+          <button role="tab" id="tab-2" aria-selected="false" aria-controls="demo-panel" tabindex="-1" data-step="2"><span class="track-number">03</span><div>切换工具<small>改为 CSV 导出</small></div><span class="track-status">↗</span></button>
+          <button role="tab" id="tab-3" aria-selected="false" aria-controls="demo-panel" tabindex="-1" data-step="3"><span class="track-number">04</span><div>更新表结构<small>使用新表名与列名</small></div><span class="track-status">↗</span></button>
+        </div>
+        <div id="demo-panel" role="tabpanel" aria-labelledby="tab-0" tabindex="0">
+          <div class="change-story"><div class="change-story-heading"><span>修改如何影响下一次请求</span><button type="button" id="replay-change">重看本次变化 ↻</button></div><div id="change-animation"></div><p id="change-impact"></p></div><details class="snapshot-details"><summary>查看完整来源、SQL 与执行结果 <span>当前快照</span></summary><div class="studio-body"><div class="sources-pane"><div class="pane-heading">管理中的来源 <span>3 个 Part</span></div>
+            <div class="source-row" data-source="skill"><span class="source-icon">✳</span><div><strong>Skill</strong><small id="skill-value">最多返回 3 条记录</small></div><span class="version" id="skill-version">v1</span></div>
+            <div class="source-row" data-source="tool"><span class="source-icon">⌘</span><div><strong>Tool catalog</strong><small id="tool-value">query_database</small></div><span class="version" id="tool-version">v1</span></div>
+            <div class="source-row" data-source="dbschema"><span class="source-icon database-icon">▤</span><div><strong>Database schema</strong><small id="schema-value">customers(id, name)</small></div><span class="version" id="schema-version">v1</span></div>
+            <div class="source-legend"><span class="legend-square"></span> <span id="change-note">首次解析全部来源</span></div>
+          </div><div class="flow-pane" aria-hidden="true"><span class="compile-label">核验版本<br><span>↓</span><br>编译快照</span></div>
+          <div class="output-pane"><div class="pane-heading">下一次模型请求 <span class="gold-text">当前有效</span></div><div class="code-meta"><span id="visible-tool">query_database</span><span>SQL</span></div><pre class="sql"><code id="sql-output">SELECT id, name
+FROM customers
+ORDER BY id LIMIT 3;</code></pre><div class="result-bar"><span>↳ 实际执行结果</span><span id="result-format">JSON</span></div><pre class="result"><code id="result-output">Ada · Lin · Mei</code></pre></div></div>
+          </details><div class="studio-footer"><div><span class="check-icon">✓</span> 原始历史保持完整</div><div><span class="check-icon">✓</span> 每次请求核验版本</div><span id="step-counter">SNAPSHOT 01 / 04</span></div>
+        </div>
+      </div>
+      <div class="replay-note"><span>↳</span><p id="recording-note">实际离线执行记录 · 确定性 FunctionModel + 真实 SQLite 工具调用。展示上下文机制，不代表真实 LLM 质量或服务端缓存命中。</p><a href="./assets/demo-recording.json" download>原始记录 ↗</a></div>
+
+</section>
+
+<section class="memory chapter shell" id="memory" aria-labelledby="memory-title">
+  <div class="chapter-label"><span>04</span> 记忆与当前工作</div>
+  <div class="memory-layout"><div class="memory-cover"><div class="fluid-art red-gold fluid-secondary" aria-hidden="true"><i class="fluid-layer fluid-one"></i><i class="fluid-layer fluid-two"></i><i class="fluid-layer fluid-three"></i><div class="fluid-shade"></div></div><div class="memory-cover-text"><span>有些信息，值得留下。</span><h2 id="memory-title">记得过去。<br>专注当下。</h2><p>历史、事实、目标和状态，<br>不必挤在同一段摘要里。</p></div></div>
+    <div class="memory-types">
+      <article><span>01</span><div><h3>原始历史 <small>History</small></h3><p>记录实际发生的消息、工具请求与结果。完整归档用于审计和恢复，本次模型输入使用独立投影，并保护当前工具协议链。</p></div></article>
+      <article><span>02</span><div><h3>长期事实 <small>Fact</small></h3><p>通过宿主接入的写入流程，按 schema、来源和版本检查入库。保存不等于自动进入模型，读取与激活仍受权限约束。</p></div></article>
+      <article><span>03</span><div><h3>工作目标 <small>Objective</small></h3><p>表达当前要完成什么，以及下一步方向。独立于历史摘要，由宿主或受控工具在适当时机更新。</p></div></article>
+      <article><span>04</span><div><h3>工作状态 <small>WorkState</small></h3><p>保存当前方案与有效约束。用字段级 patch 修改，未涉及的字段默认保留；删除、清空与替换分别检查许可。</p></div></article>
+    </div></div>
+
+  <figure class="memory-blueprint" aria-labelledby="memory-map-title">
+    <figcaption><div><p class="small-label">MEMORY, DECOMPOSED</p><h3 id="memory-map-title">四类信息，各有自己的结构。</h3></div><p>历史保留发生过的事；事实保存值得复用的信息；<br>目标描述要做什么；状态记录当前做到哪里。</p></figcaption>
+    <div class="memory-nodes">
+      <article class="memory-node history-node"><header><span>01 / HISTORY</span><h4>原始历史与投影</h4></header><dl><dt>完整消息</dt><dd>用户请求、模型回复</dd><dt>工具协议链</dt><dd>工具调用、执行结果及配对</dd><dt>归档与索引</dt><dd>完整对象、来源引用、scope</dd><dt>请求投影</dt><dd>近期交互、当前工具链</dd></dl><footer>可选摘要 · 按需 search / lookup</footer></article>
+      <article class="memory-node"><header><span>02 / FACT</span><h4>可持久化的事实</h4></header><dl><dt>内容与类型</dt><dd><code>value · kind · key</code></dd><dt>结构约束</dt><dd><code>schema_id · schema_version</code></dd><dt>证据与作用域</dt><dd><code>evidence · scope_id</code></dd><dt>版本与生命周期</dt><dd><code>revision · status · verification</code></dd></dl><footer>检查后保存 → 授权选择 / 激活</footer></article>
+      <article class="memory-node"><header><span>03 / OBJECTIVE</span><h4>当前工作的目标</h4></header><dl><dt>要完成什么</dt><dd><code>goal</code></dd><dt>约束与成功条件</dt><dd><code>constraints · success_criteria</code></dd><dt>下一步</dt><dd><code>next_steps</code></dd><dt>当前状态</dt><dd><code>active / blocked / completed</code></dd></dl><footer>可选组件 · 宿主或受控工具更新</footer></article>
+      <article class="memory-node"><header><span>04 / WORK STATE</span><h4>结构化的工作状态</h4></header><dl><dt>业务内容</dt><dd>宿主定义 schema，例如当前方案</dd><dt>状态身份与版本</dt><dd><code>scope · key · revision</code></dd><dt>受控变更</dt><dd>字段 patch、精确操作许可</dd><dt>来源与审计</dt><dd>证据引用、历史修订、审计记录</dd></dl><footer>可选组件 · 未修改字段默认保留</footer></article>
+    </div>
+    <div class="memory-routing"><div class="history-route"><span class="route-down" aria-hidden="true">↓</span><strong>近期历史投影 / 授权原文恢复</strong><p>由 HistoryManager 与适配器提供</p></div><div class="parts-route"><svg viewBox="0 0 600 32" preserveAspectRatio="none" aria-hidden="true"><path d="M100 0v14h400V0M300 0v32"/></svg><strong>选中的 Part → ContextManager → 不可变快照 → Compiler</strong><p>按权限与版本核验，并按预算编译；持久化不等于自动入模</p></div></div>
+    <div class="memory-request"><span aria-hidden="true">↓</span><div><strong>下一次模型请求</strong><p>当前任务 + 编译上下文 + 近期历史 / 恢复证据</p></div><code>messages · tools</code></div>
+    <p class="memory-map-note">结构依据仓库实现；WorkState 的业务字段由宿主定义。Fact、历史和检索资料保持数据身份，不自行升级为系统指令。</p>
+  </figure>
+  <div class="candidate-story"><div><p class="small-label">从候选到提交</p><h3>提出修改，<br>不等于已经生效。</h3></div><div><ol class="candidate-flow"><li><b>提案</b><span>补丁与来源</span></li><li><b>校验</b><span>权限与业务条件</span></li><li><b>待提交</b><span>ready ≠ committed</span></li><li><b>原子提交</b><span>重检版本并写入增量</span></li></ol><p>缺证据的候选保持 pending，验证失败的候选不会覆盖当前状态。要求改变后，旧许可撤销；正式提交时再次校验，避免使用过期的检查结论。</p></div></div>
+</section>
+
+<section class="notes chapter shell" id="notes" aria-labelledby="notes-title">
+  <div class="chapter-label"><span>05</span> 设计手记</div>
+  <div class="editorial-heading"><h2 id="notes-title">工程的分量，<br><span>藏在取舍里。</span></h2><p class="intro-text">这个项目的重点是把输入构造变成可检查的工程过程。下面这些边界，与功能本身同样重要。</p></div>
+  <div class="decision-table">
+    <article><span>01</span><h3>复用 Agent 循环</h3><div><p>通过 Pydantic AI 的请求边界接入，保留宿主的工具执行、流式输出、重试和会话恢复。</p><small>取舍：框架升级需要重新验证适配契约；当前未交付真实 DSH 生产插件。</small></div></article>
+    <article><span>02</span><h3>权限不能靠 Prompt</h3><div><p>Skill 的指令角色需要宿主明确授权。Fact、网页和检索结果保持数据身份，不能自行升级为 system 指令。</p><small>取舍：scope 标签不等于 ACL；业务工具副作用与执行授权仍由宿主负责。</small></div></article>
+    <article><span>03</span><h3>激活与常驻分离</h3><div><p>Active Set 保存资源引用与策略。SQLite 管元数据，大载荷放文件系统，热层按字节限制缓存。</p><small>取舍：聚焦嵌入式部署，当前不承诺跨主机共享与分布式事务。</small></div></article>
+    <article><span>04</span><h3>两层缓存，分别观察</h3><div><p>库内缓存复用 Part 解析与计算；稳定排序帮助减少模型请求前缀的无意义变化。</p><small>取舍：应用缓存复用不等于服务端缓存命中，也不自动意味着总费用下降。</small></div></article>
+    <article><span>05</span><h3>小历史，需要恢复路径</h3><div><p>近期窗口控制常驻输入，原始历史保留检索和读取入口。摘要作为可选机制，不承担当前状态的全部职责。</p><small>取舍：模型仍可能不查历史、查错或误用结果；通用库不保证自动恢复成功。</small></div></article>
+  </div>
+</section>
+
+<section class="evidence chapter shell" id="evidence" aria-labelledby="evidence-title">
+  <div class="chapter-label"><span>06</span> 验证与边界</div>
+  <div class="editorial-heading"><h2 id="evidence-title">展示机制。<br><span>也展示证据。</span></h2><p class="intro-text">每个结论都应该回答：测了什么、在什么条件下测、还有什么没有验证。</p></div>
+  <div class="evidence-grid"><article><p class="small-label">本页可直接查看</p><h3>确定性的执行记录</h3><p>四个阶段使用 FunctionModel 驱动真实工具与 SQLite。查看来源修订、实际 SQL、工具结果，以及传入历史未被修改的记录。</p><a class="inline-link" href="./assets/demo-recording.json" download>下载完整执行记录 <span aria-hidden="true">↗</span></a></article><article><p class="small-label">需要独立评测</p><h3>真实模型的任务能力</h3><p>任务成功、旧约束保留、记忆准确性、成本与重复可靠性需要独立实验。本页机制演示不提供这些指标的测量，也不据此宣布能力防退化通过。</p><a class="inline-link" href="https://github.com/LingHeChen/reactive-context/tree/main/tests">查看测试代码 <span aria-hidden="true">↗</span></a></article></div>
+  <div class="reading-list"><span>查看实现</span><a href="https://github.com/LingHeChen/reactive-context/blob/main/src/reactive_context/manager.py">上下文管理 ↗</a><a href="https://github.com/LingHeChen/reactive-context/blob/main/src/reactive_context/work_state.py">结构化工作状态 ↗</a><a href="https://github.com/LingHeChen/reactive-context/blob/main/src/reactive_context/state_candidates.py">候选校验与提交 ↗</a></div>
+</section>
+
+<section class="start chapter shell" id="start" aria-labelledby="start-title">
+  <div class="chapter-label"><span>07</span> 从一段 Python 开始</div>
+  <div class="start-layout"><div class="start-copy"><h2 id="start-title">声明状态。<br><span>让依赖自己连接。</span></h2><p><code>state</code> 保存本地状态，<code>computed</code> 表达同步派生计算，异步 <code>part</code> 在编译或显式解析时读取外部来源。</p><p>声明式入口与原有工厂 API 汇入同一个 Registry 和 Compiler。实例间隔离，不在普通属性访问时隐式执行异步 IO。</p><div class="install"><code>uv sync --frozen --all-extras</code><button id="copy-install" aria-label="复制本地安装命令"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M15 8V4H4v11h4"/></svg></button></div><p class="install-note">在源码仓库根目录运行 · Python 3.12+</p><a class="inline-link" href="https://github.com/LingHeChen/reactive-context/blob/main/examples/v2_dx.py">查看声明式 API 示例 ↗</a></div>
+      <div class="code-window reveal"><div class="window-header"><span class="window-dots"><i></i><i></i><i></i></span><span>your_context.py</span><span>PYTHON</span></div><pre><code><span class="syntax-purple">from</span> reactive_context <span class="syntax-purple">import</span> Context, state, computed
+
+<span class="syntax-purple">class</span> <span class="syntax-yellow">YourContext</span>(Context):
+    task: str = <span class="syntax-blue">state</span>(<span class="syntax-green">"Build something great."</span>)
+
+    <span class="syntax-orange">@computed</span>
+    <span class="syntax-purple">def</span> <span class="syntax-blue">focus</span>(self) -> str:
+        <span class="syntax-purple">return</span> <span class="syntax-green">f"Current focus: {self.task}"</span>
+
+<span class="syntax-dim"># A change. A new perspective.</span>
+ctx = <span class="syntax-yellow">YourContext</span>()
+ctx.task = <span class="syntax-green">"Make it reactive."</span>
+compiled = <span class="syntax-purple">await</span> ctx.<span class="syntax-blue">compile</span>()
+<span class="syntax-purple">await</span> ctx.<span class="syntax-blue">aclose</span>()</code></pre><div class="code-status"><span class="live-dot"></span> 声明一次，按依赖更新。<span>↵</span></div></div></div>
+
+</section>
+<footer class="footer shell"><div class="footer-top"><p>Reactive Context<span>.</span></p><a href="#main">回到顶部 ↑</a></div><div class="footer-bottom"><span>为变化中的世界，保留清晰的上下文。</span><span>Python library · 本地项目展示 · 2026</span></div></footer>
+</main><div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body></html>
