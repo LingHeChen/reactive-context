@@ -61,16 +61,9 @@ function showStep(index) {
   document.dispatchEvent(new CustomEvent('context-demo-stage', { detail: { index: currentStep } }));
 }
 
-// Scroll and manual controls share the same recorded snapshots.
-window.contextDemo = {
-  get ready() { return Boolean(recording); },
-  setStep(index) { if (index !== currentStep) showStep(index); },
-  stop() { setAutoDemo(false); },
-};
 function selectStep(index) {
   setAutoDemo(false);
   showStep(index);
-  document.dispatchEvent(new CustomEvent('context-demo-select', { detail: { index } }));
 }
 function scheduleNext() {
   clearTimeout(timer);
@@ -88,7 +81,7 @@ function scheduleNext() {
 
 function setAutoDemo(enabled) {
   autoDemo = Boolean(enabled && recording);
-  $('.replay-label').textContent = window.contextScrollDemo ? '从头演示 ↓' : autoDemo ? '停止演示' : '自动演示';
+  $('.replay-label').textContent = autoDemo ? '停止演示' : '自动演示';
   $('.play-icon').textContent = autoDemo ? 'Ⅱ' : '↗';
   $('#replay-toggle').setAttribute('aria-label', autoDemo ? '停止自动演示' : '自动演示四个阶段');
   $('#replay-toggle').setAttribute('aria-pressed', String(autoDemo));
@@ -96,7 +89,6 @@ function setAutoDemo(enabled) {
 }
 
 $('#replay-toggle').addEventListener('click', () => {
-  if (window.contextScrollDemo) { window.contextScrollDemo.restart(); return; }
   if (!autoDemo && currentStep === 3) showStep(0);
   setAutoDemo(!autoDemo);
 });
@@ -134,7 +126,6 @@ fetch('./assets/demo-recording.json')
     controls.forEach((button) => { button.disabled = false; });
     showStep(0);
     setAutoDemo(false);
-    document.dispatchEvent(new Event('context-demo-ready'));
   })
   .catch(() => {
     $('#recording-note').textContent = '执行记录未能加载。请通过本地 HTTP 服务打开页面后刷新；当前静态内容仅作界面预览，交互已禁用。';
