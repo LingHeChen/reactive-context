@@ -566,3 +566,9 @@ html { scrollbar-color: #a64b39 #130d0d; scrollbar-width: thin; }
 .memory-map-note { font-size: 11px; color: var(--faint); margin-top: 14px; line-height: 1.8; }
 @media(max-width:1000px) { .memory-nodes { grid-template-columns: repeat(2,1fr); } .memory-routing { grid-template-columns: 1fr 2fr; } .parts-route svg { visibility: hidden; } }
 @media(max-width:540px) { .memory-blueprint figcaption { display:block; } .memory-blueprint figcaption>p { margin-top:14px; } .memory-nodes { grid-template-columns:1fr; } .memory-node dd { min-height:0; } .memory-routing { grid-template-columns:1fr; gap:18px; margin-top:18px; } .parts-route svg { display:none; } .memory-request { padding:18px 0; gap:12px; flex-wrap:wrap; } .memory-request>code { width:100%; text-align:center; } }
+
+.github-link { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; min-width: 44px; color: var(--ink); font-size: 13px; white-space: nowrap; }
+.github-link svg { width: 20px; height: 20px; fill: currentColor; stroke: none; }
+.github-link:hover { color: var(--gold); }
+.footer-links { display: flex; align-items: center; gap: 24px; }
+@media (max-width: 540px) { .nav-actions .github-link span { display: none; } .nav-actions .nav-start { display: none; } .footer-top { flex-wrap: wrap; } }
