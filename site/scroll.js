@@ -128,50 +128,9 @@
   });
   document.addEventListener('context-motion-change', buildMotion);
 
-  // Keep the complete panel visible while native scrolling selects its snapshots.
-  const studio = document.querySelector('.studio');
-  let demoTrigger = null;
-  let demoMode = false;
-  function syncDemoMode() {
-    if (!window.contextDemo?.ready) return;
-    const fits = innerWidth >= 1000 && innerHeight >= studio.offsetHeight + 124;
-    const enabled = fits && !reduced.matches && !document.documentElement.classList.contains('motion-paused');
-    if (enabled === demoMode) return;
-    demoMode = enabled;
-    demoTrigger?.kill();
-    demoTrigger = null;
-    window.contextScrollDemo = null;
-    studio.classList.toggle('scroll-driven', enabled);
-    if (enabled) {
-      window.contextDemo.stop();
-      demoTrigger = ScrollTrigger.create({
-        id: 'demo-stages', trigger: studio, pin: true, refreshPriority: 1,
-        start: 'top 108px', end: () => `+=${innerHeight * 2.4}`,
-        invalidateOnRefresh: true,
-        onUpdate(self) {
-          window.contextDemo.setStep(Math.min(3, Math.floor(self.progress * 4)));
-          studio.style.setProperty('--demo-progress', self.progress);
-        },
-      });
-      window.contextScrollDemo = { restart() { scrollTo({ top: demoTrigger.start + 1, behavior: 'smooth' }); } };
-    }
-    ScrollTrigger.sort();
-    window.contextDemo.stop();
-    document.querySelector('#replay-toggle').setAttribute('aria-label', enabled ? '滚动回到第一个阶段' : '自动演示四个阶段');
-    ScrollTrigger.refresh();
-  }
-  document.addEventListener('context-demo-select', ({ detail }) => {
-    if (demoTrigger) scrollTo({ top: demoTrigger.start + (detail.index + .5) / 4 * (demoTrigger.end - demoTrigger.start), behavior: 'instant' });
-  });
-  document.addEventListener('context-demo-ready', syncDemoMode);
-  document.addEventListener('context-motion-change', syncDemoMode);
-  window.addEventListener('resize', syncDemoMode);
-  document.fonts.ready.then(syncDemoMode);
-  syncDemoMode();
-
   function refreshAfterLayout() {
     clearTimeout(refreshTimer);
-    refreshTimer = setTimeout(() => { syncDemoMode(); ScrollTrigger.refresh(); }, 100);
+    refreshTimer = setTimeout(() => ScrollTrigger.refresh(), 100);
   }
   document.querySelectorAll('details').forEach((detail) => detail.addEventListener('toggle', refreshAfterLayout));
   // Replay output and disclosures can change document height after initial measurement.
