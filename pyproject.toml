@@ -1,0 +1,65 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "reactive-context"
+version = "0.3.0"
+description = "Snapshot-based reactive context compilation for agents"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = ["pydantic>=2.12,<3"]
+license = "MIT"
+
+[project.optional-dependencies]
+pydantic-ai = ["pydantic-ai-slim==2.60.0"]
+http = ["httpx>=0.28,<1"]
+
+[dependency-groups]
+benchmark = [
+    "backoff>=2.2.1",
+    "numpy>=2.5.4",
+    "pandas>=3.1.0",
+    "pyarrow>=26.0.0",
+    "pydantic-ai-slim[openai]==2.60.0",
+    "python-dotenv>=1.2.4",
+    "rank-bm25>=0.2.2",
+    "socksio>=1.0.0",
+    "tiktoken>=0.14.0",
+    "tqdm>=4.70.1",
+    "tree-sitter-language-pack>=1.22.1",
+]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=1",
+    "hypothesis>=6",
+    "ruff>=0.14",
+    "pyright>=1.1",
+    "build>=1",
+    "httpx>=0.28",
+    "pydantic-ai-slim[anthropic]==2.60.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.12"
+typeCheckingMode = "standard"
+include = ["src"]
+
+[tool.hatch.build.targets.sdist]
+only-include = ["src", "tests", "examples", "benchmarks", "README.md", "pyproject.toml", "uv.lock", "LICENSE", ".env.example", ".gitignore"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/reactive_context"]

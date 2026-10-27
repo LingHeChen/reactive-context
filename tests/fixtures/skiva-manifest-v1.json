@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "snapshotId": "019a03d8-0000-7000-8000-000000000001",
+  "manifestDigest": "sha256:e3f50a49c0d372f4d6f67900270f40bbfc072a865a9d36f2ed08e582830b7866",
+  "generation": 1,
+  "profileId": "019a03d8-0000-7000-8000-000000000002",
+  "files": [
+    {
+      "path": "sample/SKILL.md",
+      "type": "file",
+      "size": 1,
+      "digest": "sha256:ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb",
+      "mode": 292
+    }
+  ]
+}
